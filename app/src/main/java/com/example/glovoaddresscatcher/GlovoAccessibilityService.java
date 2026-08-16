@@ -24,7 +24,7 @@ public class GlovoAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        showOverlay("Catcher включён ✓");
+        
     }
 
     @Override
