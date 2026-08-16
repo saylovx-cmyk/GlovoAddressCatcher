@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Glovo Address Catcher</string>
+    <string name="accessibility_description">Сохраняет адрес доставки, показанный в приложении Glovo.</string>
+</resources>
