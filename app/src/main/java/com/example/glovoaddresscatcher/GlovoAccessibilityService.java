@@ -154,4 +154,110 @@ public class GlovoAccessibilityService extends AccessibilityService {
 
         for (int i = 0; i < node.getChildCount(); i++) {
 
-            Accessibility
+    AccessibilityNodeInfo child = node.getChild(i);
+
+    if (child != null) {
+        collectText(child, result);
+        child.recycle();
+    }
+}
+}
+
+/*
+ * Пока это тестовый фильтр.
+ * После первого реального заказа подправим его под Glovo.
+ */
+private String findAddressCandidate(List<String> texts) {
+
+    for (String text : texts) {
+
+        String lower = text.toLowerCase(Locale.ROOT);
+
+        boolean hasStreetWord =
+                lower.contains("ul.")
+                || lower.contains("ulica")
+                || lower.contains("aleja")
+                || lower.contains("plac")
+                || lower.contains("osiedle")
+                || lower.contains("święty")
+                || lower.contains("św.");
+
+        boolean hasNumber = text.matches(".*\\d+.*");
+
+        boolean reject =
+                lower.contains("zł")
+                || lower.contains("km")
+                || lower.contains("zamów")
+                || lower.contains("заказ")
+                || lower.contains("доставка")
+                || lower.contains("delivery")
+                || lower.contains("принять")
+                || lower.contains("accept");
+
+        if (!reject
+                && text.length() >= 5
+                && text.length() <= 120
+                && (hasStreetWord || hasNumber)) {
+
+            return text;
+        }
+    }
+
+    return null;
+}
+
+private void showOverlay(String text) {
+
+    if (windowManager == null) {
+        return;
+    }
+
+    if (overlay == null) {
+
+        overlay = new TextView(this);
+        overlay.setTextSize(16);
+        overlay.setTextColor(0xFFFFFFFF);
+        overlay.setBackgroundColor(0xE6000000);
+        overlay.setPadding(25, 15, 25, 15);
+
+        WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT,
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                        PixelFormat.TRANSLUCENT
+                );
+
+        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        params.y = 100;
+
+        try {
+            windowManager.addView(overlay, params);
+        } catch (Exception ignored) {
+            return;
+        }
+    }
+
+    overlay.setText(text);
+}
+
+@Override
+public void onInterrupt() {
+}
+
+@Override
+public void onDestroy() {
+
+    if (overlay != null && windowManager != null) {
+        try {
+            windowManager.removeView(overlay);
+        } catch (Exception ignored) {
+        }
+    }
+
+    overlay = null;
+    super.onDestroy();
+}
+}
